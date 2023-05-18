@@ -1,5 +1,6 @@
+from discord import Message
 from data_structures.Node import Node
-
+import json
 class LinkedList:
     def __init__(self):
         self.head = None
@@ -43,3 +44,23 @@ class LinkedList:
                 commands.append(node.data)
             node = node.next
         return commands
+
+    def save_to_file(self, file_path):
+        commands = []
+        node = self.head
+        while node is not None:
+            commands.append(node.data.to_dict())
+            node = node.next
+        with open(file_path, 'w') as f:
+            json.dump(commands, f)
+
+    def load_from_file(self, file_path):
+        try:
+            with open(file_path, 'r') as f:
+                commands = json.load(f)
+        except FileNotFoundError:
+            commands = []
+        for command in commands:
+            data = Message(**command)
+            self.append(data)
+

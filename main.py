@@ -12,6 +12,7 @@ intents = discord.Intents.all() # Enable all intents
 client = commands.Bot(command_prefix = '!', intents = intents) # Create a bot
 
 history = LinkedList()
+history.load_from_file('command_history.json')
 
 @client.command(name='last')
 async def history_last(ctx):
@@ -43,6 +44,12 @@ async def history_clear(ctx):
 async def delete(ctx, amount: int = 100):
     await ctx.channel.purge(limit = amount + 1)
 
+@client.command(name='shutdown')
+@commands.is_owner()
+async def shutdown(ctx):
+    """Shutdown the bot."""
+    await ctx.client.logout()
+
 @client.event
 async def on_message(message):
     if message.content.lower().startswith('hello'):
@@ -57,6 +64,9 @@ async def on_message(message: discord.Message):
         await message.channel.send('Hello!')
     await client.process_commands(message)
 
+@client.event
+async def on_disconnect():
+    history.save_to_file('command_history.json')
 
 @client.listen()
 async def on_message(message):
